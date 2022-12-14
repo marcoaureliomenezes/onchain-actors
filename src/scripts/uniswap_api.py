@@ -43,16 +43,14 @@ def main():
     UNI_ADDRESS = config['networks'][network.show_active()]['uni_token']
     uni_contract = interface.IERC20(UNI_ADDRESS)
     AMOUNT_IN_ETH = 10**18
-    ROUTER02 = config['networks'][network.show_active()]['uniswapV2Router02']
-    deploy_dm_actor(PERSON, ROUTER02)
-
-    print(f"AMOUNT ETH BEFORE SWAP 1 ETH PER DAI: {PERSON.balance() / 10**18}")
+    print(UniswapWatcher[-1].address)
+    print(f"AMOUNT ETH BEFORE SWAP 1 ETH PER UNI: {PERSON.balance() / 10**18}")
     print(f"AMOUNT UNI BEFORE SWAP 1 ETH PER UNI: {uni_contract.balanceOf(PERSON) / 10**18}")
     swap_exact_eth_amount_for_token(PERSON, UNI_ADDRESS, AMOUNT_IN_ETH)
-    print(f"AMOUNT ETH AFTER SWAP 1 ETH PER DAI: {PERSON.balance() / 10**18}")
-    print(f"AMOUNT DAI AFTER SWAP 1 ETH PER DAI: {uni_contract.balanceOf(PERSON) / 10**18}")
-    time.sleep(20)
+    time.sleep(2)
+    print(f"AMOUNT ETH AFTER SWAP 1 ETH PER UNI: {PERSON.balance() / 10**18}")
+    print(f"AMOUNT UNI AFTER SWAP 1 ETH PER UNI: {uni_contract.balanceOf(PERSON) / 10**18}")
     amount_uni_received = uni_contract.balanceOf(PERSON)
     swap_exact_token_amount_for_eth(PERSON, UNI_ADDRESS, amount_uni_received)
-    print(f"AMOUNT ETH AFTER SWAP 1 ETH PER DAI: {PERSON.balance() / 10**18}")
-    print(f"AMOUNT DAI AFTER SWAP 1 ETH PER DAI: {uni_contract.balanceOf(PERSON) / 10**18}")
+    print(f"AMOUNT ETH AFTER SWAP {amount_uni_received} UNI PER ETH: {PERSON.balance() / 10**18}")
+    print(f"AMOUNT UNI AFTER SWAP {amount_uni_received} UNI PER ETH: {uni_contract.balanceOf(PERSON) / 10**18}")

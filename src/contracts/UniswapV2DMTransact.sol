@@ -2,13 +2,13 @@
 
 pragma solidity >=0.5.0;
 
-import "../interfaces/IUniswapWatcher.sol";
+import "../interfaces/IUniswapV2DMTransact.sol";
 import "../interfaces/IUniswapV2Router02.sol";
 import "../interfaces/IUniswapV2Pair.sol";
 import "../interfaces/IERC20.sol";
 
 
-contract UniswapWatcher is IUniswapWatcher {
+contract UniswapV2DMTransact is IUniswapV2DMTransact {
 
     IUniswapV2Router02 public immutable router02;
 
