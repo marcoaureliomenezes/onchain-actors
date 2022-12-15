@@ -13,9 +13,8 @@ contract UniswapV3DMTransact {
     uint24 public poolFee;
     ISwapRouter public immutable swapRouter;
 
-    constructor(address _swapRouter, uint24 _poolFee) {
+    constructor(address _swapRouter) {
         swapRouter = ISwapRouter(_swapRouter);
-        poolFee = _poolFee;
     }
 
     function getFactory() public view returns (address factory) {
@@ -23,7 +22,7 @@ contract UniswapV3DMTransact {
         return address(swapRouter);
     }
 
-    function swapExactInputSingle(uint256 amountIn, address tokenIn, address tokenOut) external returns (uint256 amountOut) {
+    function swapExactInputSingle(uint256 amountIn, address tokenIn, address tokenOut, uint24 poolFee) external returns (uint256 amountOut) {
         TransferHelper.safeTransferFrom(tokenIn, msg.sender, address(this), amountIn);
         TransferHelper.safeApprove(tokenIn, address(swapRouter), amountIn);
 
@@ -41,7 +40,7 @@ contract UniswapV3DMTransact {
         amountOut = swapRouter.exactInputSingle(params);
     }
 
-    function swapExactOutputSingle(uint256 amountOut, uint256 amountInMaximum, address tokenIn, address tokenOut) 
+    function swapExactOutputSingle(uint256 amountOut, uint256 amountInMaximum, address tokenIn, address tokenOut, uint24 poolFee) 
                                                                                     external returns (uint256 amountIn) {
         TransferHelper.safeTransferFrom(tokenIn, msg.sender, address(this), amountInMaximum);
         TransferHelper.safeApprove(tokenIn, address(swapRouter), amountInMaximum);
