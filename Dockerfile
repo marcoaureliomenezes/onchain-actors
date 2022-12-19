@@ -18,6 +18,6 @@ RUN brownie pm install uniswap/v2-core@1.0.1
 
 COPY ./src .
 
-
+RUN brownie compile
 
 ENTRYPOINT [ "sleep", "infinity" ]

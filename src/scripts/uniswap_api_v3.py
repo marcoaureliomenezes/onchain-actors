@@ -35,13 +35,13 @@ def main():
     print(f"Balance of ETH before 1º SWAP: {PERSON.balance()}")
     print(f"Balance of WETH before 1º SWAP: {weth_contract.balanceOf(PERSON)}")
     print(f"Balance of UNI before 1º SWAP: {uni_contract.balanceOf(PERSON)}")
-    swap_v3_1(PERSON, WETH_ADDRESS, UNI_ADDRESS, AMOUNT_IN_ETH, FEE)
+    swap_exact_input_single(PERSON, WETH_ADDRESS, UNI_ADDRESS, AMOUNT_IN_ETH, FEE)
 
     print(f"Balance of ETH after 1º SWAP: {PERSON.balance()}")
     print(f"Balance of WETH after 1º SWAP: {weth_contract.balanceOf(PERSON)}")
     print(f"Balance of UNI after 1º SWAP: {uni_contract.balanceOf(PERSON)}")
 
-    swap_v3_1(PERSON, UNI_ADDRESS, WETH_ADDRESS, uni_contract.balanceOf(PERSON), FEE)
+    swap_exact_input_single(PERSON, UNI_ADDRESS, WETH_ADDRESS, uni_contract.balanceOf(PERSON), FEE)
     interface.IERC20(WETH_ADDRESS).withdraw(weth_contract.balanceOf(PERSON), {"from": PERSON})
 
     print(f"Balance of ETH after 2º SWAP: {PERSON.balance()}")

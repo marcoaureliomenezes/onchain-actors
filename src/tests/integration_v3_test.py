@@ -18,8 +18,9 @@ def test_can_wrap_and_unwrap_ether():
     interface.IERC20(WETH_ADDRESS).deposit({"from": PERSON, "value": AMOUNT_IN_ETH})
     eth_balance_after = PERSON.balance()
     weth_balance_after = weth_contract.balanceOf(PERSON)
-    print(eth_balance_before, weth_balance_before)
-    print(eth_balance_after, weth_balance_after)
+    assert weth_balance_before == 0 
+    assert eth_balance_before == eth_balance_after + weth_balance_after
+    
     
 def test_can_swap_and_unswap_tokens():
     if network.show_active() not in ["goerli"]: pytest.skip("only for test-networks")

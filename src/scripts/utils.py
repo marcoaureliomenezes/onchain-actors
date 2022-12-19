@@ -11,8 +11,3 @@ def get_account(**kwargs):
     elif is_local and not kwargs.get('index'): return accounts[0]
     elif not is_local and kwargs.get("id"): return accounts.load(kwargs["id"])
     else: return accounts.add(config["wallets"]["from_key"])
-
-
-def get_chainlink_price():
-    uni_eth_pricefeed = config['networks'][network.show_active()]['uni_eth_price']
-    return interface.IV3AggregatorInterface(uni_eth_pricefeed)

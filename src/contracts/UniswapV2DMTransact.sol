@@ -48,25 +48,22 @@ contract UniswapV2DMTransact is IUniswapV2DMTransact {
       
     }
 
-    function swapExactETHForTokens(address tokenOut) external payable returns (uint[] memory amounts) {
-        
+    function swapExactETHForTokens(address tokenOut, uint amountOutMin) external payable returns (uint[] memory amounts) {
         address[] memory path = new address[](2);
         path[0] = router02.WETH();
         path[1] = tokenOut;
-        uint amountOutMin = 1;
         amounts = router02.swapExactETHForTokens{value: msg.value}(amountOutMin, path, msg.sender, block.timestamp);
         return amounts;
       
     }
 
-    function swapExactTokensForETH(uint amountIn, address tokenIn) public returns (uint[] memory amounts) {
+    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address tokenIn) public returns (uint[] memory amounts) {
         IERC20 ERC20 = IERC20(tokenIn);
         require(ERC20.transferFrom(msg.sender, address(this), amountIn), 'transferFrom failed.');
         require(ERC20.approve(address(router02), amountIn), 'approve failed.');
         address[] memory path = new address[](2);
         path[0] = tokenIn;
         path[1] = router02.WETH();
-        uint amountOutMin = 1;
         amounts = router02.swapExactTokensForETH(amountIn, amountOutMin, path, msg.sender, block.timestamp);
         return amounts;
     }
@@ -83,26 +80,24 @@ contract UniswapV2DMTransact is IUniswapV2DMTransact {
         return amounts;
     }
 
-    function swapExactTokensForTokens(uint amountIn, address tokenIn, address tokenOut) public returns (uint[] memory amounts) {
+    function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address tokenIn, address tokenOut) public returns (uint[] memory amounts) {
         IERC20 ERC20 = IERC20(tokenIn);
         require(ERC20.transferFrom(msg.sender, address(this), amountIn), 'transferFrom failed.');
         require(ERC20.approve(address(router02), amountIn), 'approve failed.');
         address[] memory path = new address[](2);
         path[0] = tokenIn;
         path[1] = tokenOut;
-        uint amountOutMin = 1;
         amounts = router02.swapExactTokensForTokens(amountIn, amountOutMin, path, msg.sender, block.timestamp);
         return amounts;
     }
 
-    function swapTokensForExactTokens(uint amountIn, uint amountOut, address tokenIn, address tokenOut) public returns (uint[] memory amounts) {
+    function swapTokensForExactTokens(uint amountIn, uint amountInMax, uint amountOut, address tokenIn, address tokenOut) public returns (uint[] memory amounts) {
         IERC20 ERC20 = IERC20(tokenIn);
         require(ERC20.transferFrom(msg.sender, address(this), amountIn), 'transferFrom failed.');
         require(ERC20.approve(address(router02), amountIn), 'approve failed.');
         address[] memory path = new address[](2);
         path[0] = tokenIn;
         path[1] = tokenOut;
-        uint amountInMax = 10**21;
         amounts = router02.swapTokensForExactTokens(amountOut, amountInMax, path, msg.sender, block.timestamp);
         return amounts;
     }

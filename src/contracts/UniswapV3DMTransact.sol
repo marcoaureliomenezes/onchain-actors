@@ -18,11 +18,10 @@ contract UniswapV3DMTransact {
     }
 
     function getFactory() public view returns (address factory) {
-
         return address(swapRouter);
     }
 
-    function swapExactInputSingle(uint256 amountIn, address tokenIn, address tokenOut, uint24 poolFee) external returns (uint256 amountOut) {
+    function swapExactInputSingle(uint256 amountIn, uint amountOutMin, address tokenIn, address tokenOut, uint24 poolFee) external returns (uint256 amountOut) {
         TransferHelper.safeTransferFrom(tokenIn, msg.sender, address(this), amountIn);
         TransferHelper.safeApprove(tokenIn, address(swapRouter), amountIn);
 
@@ -34,16 +33,16 @@ contract UniswapV3DMTransact {
                 recipient: msg.sender,
                 deadline: block.timestamp,
                 amountIn: amountIn,
-                amountOutMinimum: 0,
+                amountOutMinimum: amountOutMin,
                 sqrtPriceLimitX96: 0
             });
         amountOut = swapRouter.exactInputSingle(params);
     }
 
-    function swapExactOutputSingle(uint256 amountOut, uint256 amountInMaximum, address tokenIn, address tokenOut, uint24 poolFee) 
+    function swapExactOutputSingle(uint256 amountOut, uint256 amountInMax, address tokenIn, address tokenOut, uint24 poolFee) 
                                                                                     external returns (uint256 amountIn) {
-        TransferHelper.safeTransferFrom(tokenIn, msg.sender, address(this), amountInMaximum);
-        TransferHelper.safeApprove(tokenIn, address(swapRouter), amountInMaximum);
+        TransferHelper.safeTransferFrom(tokenIn, msg.sender, address(this), amountInMax);
+        TransferHelper.safeApprove(tokenIn, address(swapRouter), amountInMax);
 
         ISwapRouter.ExactOutputSingleParams memory params =
             ISwapRouter.ExactOutputSingleParams({
@@ -53,15 +52,13 @@ contract UniswapV3DMTransact {
                 recipient: msg.sender,
                 deadline: block.timestamp,
                 amountOut: amountOut,
-                amountInMaximum: amountInMaximum,
+                amountInMaximum: amountInMax,
                 sqrtPriceLimitX96: 0
             });
-
         amountIn = swapRouter.exactOutputSingle(params);
-
-          if (amountIn < amountInMaximum) {
+          if (amountIn < amountInMax) {
             TransferHelper.safeApprove(tokenIn, address(swapRouter), 0);
-            TransferHelper.safeTransfer(tokenIn, msg.sender, amountInMaximum - amountIn);
+            TransferHelper.safeTransfer(tokenIn, msg.sender, amountInMax - amountIn);
         }
     }
 }
