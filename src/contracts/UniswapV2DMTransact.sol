@@ -21,7 +21,7 @@ contract UniswapV2DMTransact is IUniswapV2DMTransact {
         return factory;
     }
 
-    function getAmountIn(uint amountOut, address tokenIn, address tokenOut) public view returns (uint[] memory amountIn) {
+    function getAmountIn(uint amountOut, address tokenIn, address tokenOut) public view override returns (uint[] memory amountIn) {
         address[] memory path = new address[](2);
         path[0] = tokenIn;
         path[1] = tokenOut;
@@ -30,7 +30,7 @@ contract UniswapV2DMTransact is IUniswapV2DMTransact {
     }
     
 
-    function getAmountOut(uint amountIn, address tokenIn, address tokenOut) public view returns (uint[] memory amountOut) {
+    function getAmountOut(uint amountIn, address tokenIn, address tokenOut) public view override returns (uint[] memory amountOut) {
         address[] memory path = new address[](2);
         path[0] = tokenIn;
         path[1] = tokenOut;
@@ -38,17 +38,9 @@ contract UniswapV2DMTransact is IUniswapV2DMTransact {
         return amountOut;
     }
 
-    function swapETHForExactTokens(uint amountOut, address tokenOut) external payable returns (uint[] memory amounts) {
-        
-        address[] memory path = new address[](2);
-        path[0] = router02.WETH();
-        path[1] = tokenOut;
-        amounts = router02.swapETHForExactTokens{value: msg.value}(amountOut, path, msg.sender, block.timestamp);
-        return amounts;
-      
-    }
 
-    function swapExactETHForTokens(address tokenOut, uint amountOutMin) external payable returns (uint[] memory amounts) {
+
+    function swapExactETHForTokens(address tokenOut, uint amountOutMin) public override payable returns (uint[] memory amounts) {
         address[] memory path = new address[](2);
         path[0] = router02.WETH();
         path[1] = tokenOut;
@@ -57,7 +49,7 @@ contract UniswapV2DMTransact is IUniswapV2DMTransact {
       
     }
 
-    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address tokenIn) public returns (uint[] memory amounts) {
+    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address tokenIn) public override returns (uint[] memory amounts) {
         IERC20 ERC20 = IERC20(tokenIn);
         require(ERC20.transferFrom(msg.sender, address(this), amountIn), 'transferFrom failed.');
         require(ERC20.approve(address(router02), amountIn), 'approve failed.');
@@ -68,19 +60,27 @@ contract UniswapV2DMTransact is IUniswapV2DMTransact {
         return amounts;
     }
 
-    function swapTokensForExactETH(uint amountIn, uint amountOut, address tokenIn) public returns (uint[] memory amounts) {
+    function swapETHForExactTokens(uint amountOut, address tokenOut) public override payable returns (uint[] memory amounts) {
+        address[] memory path = new address[](2);
+        path[0] = router02.WETH();
+        path[1] = tokenOut;
+        amounts = router02.swapETHForExactTokens{value: msg.value}(amountOut, path, msg.sender, block.timestamp);
+        return amounts;
+    }
+
+
+    function swapTokensForExactETH(uint amountIn, uint amountInMax, uint amountOut, address tokenIn) public override returns (uint[] memory amounts) {
         IERC20 ERC20 = IERC20(tokenIn);
         require(ERC20.transferFrom(msg.sender, address(this), amountIn), 'transferFrom failed.');
         require(ERC20.approve(address(router02), amountIn), 'approve failed.');
         address[] memory path = new address[](2);
         path[0] = tokenIn;
         path[1] = router02.WETH();
-        uint amountInMax = 10**21;
         amounts = router02.swapTokensForExactETH(amountOut, amountInMax, path, msg.sender, block.timestamp);
         return amounts;
     }
 
-    function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address tokenIn, address tokenOut) public returns (uint[] memory amounts) {
+    function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address tokenIn, address tokenOut) public override returns (uint[] memory amounts) {
         IERC20 ERC20 = IERC20(tokenIn);
         require(ERC20.transferFrom(msg.sender, address(this), amountIn), 'transferFrom failed.');
         require(ERC20.approve(address(router02), amountIn), 'approve failed.');
@@ -91,7 +91,7 @@ contract UniswapV2DMTransact is IUniswapV2DMTransact {
         return amounts;
     }
 
-    function swapTokensForExactTokens(uint amountIn, uint amountInMax, uint amountOut, address tokenIn, address tokenOut) public returns (uint[] memory amounts) {
+    function swapTokensForExactTokens(uint amountIn, uint amountInMax, uint amountOut, address tokenIn, address tokenOut) public override returns (uint[] memory amounts) {
         IERC20 ERC20 = IERC20(tokenIn);
         require(ERC20.transferFrom(msg.sender, address(this), amountIn), 'transferFrom failed.');
         require(ERC20.approve(address(router02), amountIn), 'approve failed.');
@@ -101,6 +101,5 @@ contract UniswapV2DMTransact is IUniswapV2DMTransact {
         amounts = router02.swapTokensForExactTokens(amountOut, amountInMax, path, msg.sender, block.timestamp);
         return amounts;
     }
-
 
 }

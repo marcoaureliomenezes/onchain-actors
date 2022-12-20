@@ -5,7 +5,7 @@ import pytest, logging
 
 logging.basicConfig(level='INFO')
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def uniswap_watcher():
     if network.show_active() != "mainnet-fork": pytest.skip("only for forked-networks")
     owner = get_account()
@@ -13,142 +13,162 @@ def uniswap_watcher():
     return deploy_uniswap_v2_actor(owner, router02)
 
 
-@pytest.fixture
+@pytest.fixture()
 def init_config():
-    UNI_TOKEN = config['networks'][network.show_active()]['uni_token']
-    WETH_TOKEN = config['networks'][network.show_active()]['weth_token']
-    UNI_ETH_ORACLE_ADDRESS = config['networks'][network.show_active()]['uni_eth_price']
-    AMOUNT_IN = 10**18
-    UNI_ETH_PRICE = interface.IV3AggregatorInterface(UNI_ETH_ORACLE_ADDRESS).latestRoundData()[1]
-    return UNI_TOKEN, WETH_TOKEN, UNI_ETH_PRICE, AMOUNT_IN
+    uni_address = config['networks'][network.show_active()]['uni_token']
+    weth_address = config['networks'][network.show_active()]['weth_token']
+    uni_eth_price = config['networks'][network.show_active()]['uni_eth_price']
+    amount_in = 10**18
+    duni_eth_price = interface.IV3AggregatorInterface(uni_eth_price).latestRoundData()[1]
+    return uni_address, weth_address, duni_eth_price, amount_in
 
-@pytest.fixture
+@pytest.fixture()
 def init_balance():
-    PERSON = get_account()
-    UNI_TOKEN = config['networks'][network.show_active()]['uni_token']
-    WETH_TOKEN = config['networks'][network.show_active()]['weth_token']
-    BALANCE_ETH = PERSON.balance()
-    BALANCE_WETH = interface.IERC20(WETH_TOKEN).balanceOf(PERSON)
-    BALANCE_UNI = interface.IERC20(UNI_TOKEN).balanceOf(PERSON)
-    return PERSON, BALANCE_ETH, BALANCE_WETH, BALANCE_UNI
+    customer = get_account()
+    uni_address = config['networks'][network.show_active()]['uni_token']
+    weth_address = config['networks'][network.show_active()]['weth_token']
+    balance_eth = customer.balance()
+    balance = interface.IERC20(weth_address).balanceOf(customer)
+    balance_uni = interface.IERC20(uni_address).balanceOf(customer)
+    return customer, balance_eth, balance, balance_uni
 
 
-@pytest.fixture
+@pytest.fixture()
 def get_some_uni():
-    PERSON = get_account()
-    UNI_TOKEN = config['networks'][network.show_active()]['uni_token']
-    AMOUNT_OUT_MIN = 1
-    tx = UniswapV2DMTransact[-1].swapExactETHForTokens(UNI_TOKEN, AMOUNT_OUT_MIN, {"from": PERSON, "value": 10**18})
-    uni_balance = interface.IERC20(UNI_TOKEN).balanceOf(PERSON)
-    interface.IERC20(UNI_TOKEN).approve(UniswapV2DMTransact[-1].address, uni_balance, {"from": PERSON})
-    return uni_balance, PERSON
+    customer = get_account()
+    uni_address = config['networks'][network.show_active()]['uni_token']
+    amount_out_min = 1
+    _ = UniswapV2DMTransact[-1].swapExactETHForTokens(uni_address, amount_out_min, {"from": customer, "value": 10**18})
+    uni_balance = interface.IERC20(uni_address).balanceOf(customer)
+    interface.IERC20(uni_address).approve(UniswapV2DMTransact[-1].address, uni_balance, {"from": customer})
+    return uni_balance, customer
 
-
-
+@pytest.mark.require_network("mainnet-fork")
 def test_is_factory_right(uniswap_watcher):
-    if network.show_active() != "mainnet-fork": pytest.skip("only for forked-networks")
     uniswap_v2_factory = config['networks'][network.show_active()]['uniswapV2Factory']
     assert uniswap_watcher.getFactory() == uniswap_v2_factory
 
 
-# tests if actual price of UNI-WETH given 1 UNI.
-def test_can_calculate_amounts_in(uniswap_watcher, init_config):
-    if network.show_active() != "mainnet-fork": pytest.skip("only for forked-networks")
-    UNI_TOKEN, WETH_TOKEN, UNI_ETH_PRICE, AMOUNT_IN = init_config
-    uni_eth_swap_price_path = uniswap_watcher.getAmountIn(AMOUNT_IN, UNI_TOKEN, WETH_TOKEN)
+@pytest.mark.require_network("mainnet-fork")
+def test_can_calculate_amounts_in(uniswap_watcher):
+    uni_eth_pricefeed_address = config['networks'][network.show_active()]['uni_eth_price']
+    uni_eth_price = interface.IV3AggregatorInterface(uni_eth_pricefeed_address).latestRoundData()[1]
+    uni_address = config['networks'][network.show_active()]['uni_token']
+    weth_address = config['networks'][network.show_active()]['weth_token']
+    amount_in = 10**18
+    uni_eth_swap_price_path = uniswap_watcher.getAmountIn(amount_in, uni_address, weth_address)
     uni_eth_swap_price = (uni_eth_swap_price_path[1] / uni_eth_swap_price_path[0]) * 10 ** 18
-    assert UNI_ETH_PRICE / uni_eth_swap_price > 0.98
-    assert UNI_ETH_PRICE / uni_eth_swap_price < 1.02
+    assert uni_eth_price / uni_eth_swap_price > 0.98
+    assert uni_eth_price / uni_eth_swap_price < 1.02
 
 
-# tests if actual price of UNI-WETH given 1 UNI.
-def test_can_calculate_amounts_out(uniswap_watcher, init_config):
-    if network.show_active() != "mainnet-fork": pytest.skip("only for forked-networks")
-    UNI_TOKEN, WETH_TOKEN, UNI_ETH_PRICE, AMOUNT_IN = init_config
-    uni_eth_swap_price_path = uniswap_watcher.getAmountOut(AMOUNT_IN, UNI_TOKEN, WETH_TOKEN)
+@pytest.mark.require_network("mainnet-fork")
+def test_can_calculate_amounts_out(uniswap_watcher):
+    uni_eth_pricefeed_address = config['networks'][network.show_active()]['uni_eth_price']
+    uni_eth_price = interface.IV3AggregatorInterface(uni_eth_pricefeed_address).latestRoundData()[1]
+    uni_address = config['networks'][network.show_active()]['uni_token']
+    weth_address = config['networks'][network.show_active()]['weth_token']
+    amount_in = 10**18
+    uni_eth_swap_price_path = uniswap_watcher.getAmountOut(amount_in, uni_address, weth_address)
     uni_eth_swap_price = uni_eth_swap_price_path[1]
-    assert UNI_ETH_PRICE / uni_eth_swap_price > 0.98
-    assert UNI_ETH_PRICE / uni_eth_swap_price < 1.02
+    assert uni_eth_price / uni_eth_swap_price > 0.98
+    assert uni_eth_price / uni_eth_swap_price < 1.02
 
 
-# test can swap exact amount of ther per token successfully.
-def test_can_swap_exact_eth_amount_for_token(uniswap_watcher, init_config, init_balance):
-    if network.show_active() not in ["mainnet-fork"]: pytest.skip("only for test-networks")
-    UNI_TOKEN, _, UNI_ETH_PRICE, AMOUNT_IN = init_config
-    PERSON, INIT_BALANCE_ETH, _, INIT_BALANCE_UNI = init_balance
-    AMOUNT_OUT_MIN = 1
+@pytest.mark.require_network("mainnet-fork")
+def test_can_swap_eth_for_exact_token_amount(uniswap_watcher):
+    uni_address = config['networks'][network.show_active()]['uni_token']
+    weth_address = config['networks'][network.show_active()]['weth_token']
+    uni_eth_pricefeed_address = config['networks'][network.show_active()]['uni_eth_price']
+    uni_eth_price = interface.IV3AggregatorInterface(uni_eth_pricefeed_address).latestRoundData()[1]
+    customer = get_account()
+    eth_balance_before = customer.balance()
+    amount_in = 10**18
+    uni_balance_before = interface.IERC20(uni_address).balanceOf(customer)
+    uni_eth_swap_price_pair = uniswap_watcher.getAmountOut(amount_in, weth_address, uni_address)
     # Executing the swap
-    tx = uniswap_watcher.swapExactETHForTokens(UNI_TOKEN, AMOUNT_OUT_MIN, {"from": PERSON, "value": AMOUNT_IN})
-    balance_uni_after_swap = interface.IERC20(UNI_TOKEN).balanceOf(PERSON)
-    oracle_price_1_eth_uni = 1 / UNI_ETH_PRICE
-    assert INIT_BALANCE_UNI == 0
-    assert PERSON.balance() == INIT_BALANCE_ETH - AMOUNT_IN
-    assert balance_uni_after_swap > (1 - 0.01) * oracle_price_1_eth_uni
+    _ = uniswap_watcher.swapETHForExactTokens(uni_eth_swap_price_pair[1], uni_address, {"from": customer, "value": amount_in})
+    uni_balance_after = interface.IERC20(uni_address).balanceOf(customer)
+    eth_balance_after = customer.balance()
+    assert uni_balance_before == 0
+    assert customer.balance() == eth_balance_before - amount_in
+    assert uni_balance_after > 0.99 * uni_eth_price * (eth_balance_after - eth_balance_before) / 10**18
 
 
-def test_can_swap_eth_for_exact_token_amount(uniswap_watcher, init_config, init_balance): 
-    if network.show_active() not in ["mainnet-fork"]: pytest.skip("only for test-networks")
-    PERSON, INIT_BALANCE_ETH, _, INIT_BALANCE_UNI = init_balance
-    UNI_TOKEN, WETH_TOKEN, UNI_ETH_PRICE, AMOUNT_IN = init_config
-    uni_eth_swap_price_pair = uniswap_watcher.getAmountOut(AMOUNT_IN, WETH_TOKEN, UNI_TOKEN)
-    # Executing the swap
-    tx = uniswap_watcher.swapETHForExactTokens(uni_eth_swap_price_pair[1], UNI_TOKEN, {"from": PERSON, "value": AMOUNT_IN})
-    oracle_price_1_eth_uni = 1 / UNI_ETH_PRICE
-    balance_uni_after_swap = interface.IERC20(UNI_TOKEN).balanceOf(PERSON)
-    assert INIT_BALANCE_UNI == 0
-    assert PERSON.balance() == INIT_BALANCE_ETH - AMOUNT_IN
-    assert balance_uni_after_swap > (1 - 0.01) * oracle_price_1_eth_uni
-
-
-def test_can_swap_exact_token_amount_for_eth(uniswap_watcher, init_config, get_some_uni):
-    if network.show_active() not in["mainnet-fork"]: pytest.skip("only for test-networks")
-    UNI_TOKEN, _, UNI_ETH_PRICE, _ = init_config
-    uni_balance_before, PERSON = get_some_uni
-    eth_balance_before = PERSON.balance()
-    tx = uniswap_watcher.swapExactTokensForETH(uni_balance_before, 1, UNI_TOKEN, {"from": PERSON})
-    uni_balance_after = interface.IERC20(UNI_TOKEN).balanceOf(PERSON)
-    eth_balance_after = PERSON.balance()
+@pytest.mark.require_network("mainnet-fork")
+def test_can_swap_exact_token_amount_for_eth(uniswap_watcher):
+    uni_address = config['networks'][network.show_active()]['uni_token']
+    customer = get_account()
+    uni_balance = interface.IERC20(uni_address).balanceOf(customer)
+    _ = interface.IERC20(uni_address).approve(UniswapV2DMTransact[-1].address, uni_balance, {"from": customer})
+    amount_out_min = 1
+    uni_eth_pricefeed_address = config['networks'][network.show_active()]['uni_eth_price']
+    uni_eth_price = interface.IV3AggregatorInterface(uni_eth_pricefeed_address).latestRoundData()[1]
+    eth_balance_before = customer.balance()
+    _ = uniswap_watcher.swapExactTokensForETH(uni_balance, amount_out_min, uni_address, {"from": customer})
+    uni_balance_after = interface.IERC20(uni_address).balanceOf(customer)
+    eth_balance_after = customer.balance()
     assert uni_balance_after == 0
-    assert eth_balance_after - eth_balance_before > 0.99 * UNI_ETH_PRICE * uni_balance_before / 10**18
+    assert eth_balance_after - eth_balance_before > 0.99 * uni_eth_price * uni_balance/ 10**18
+
+
+@pytest.mark.require_network("mainnet-fork")
+def test_can_swap_exact_eth_amount_for_token(uniswap_watcher):
+    uni_address = config['networks'][network.show_active()]['uni_token']
+    customer = get_account()
+    uni_balance_before = interface.IERC20(uni_address).balanceOf(customer)
+    amount_out_min = 1
+    amount_in = 10**18
+    uni_eth_pricefeed_address = config['networks'][network.show_active()]['uni_eth_price']
+    uni_eth_price = interface.IV3AggregatorInterface(uni_eth_pricefeed_address).latestRoundData()[1]
+    # Executing the swap
+    _ = uniswap_watcher.swapExactETHForTokens(uni_address, amount_out_min, {"from": customer, "value": amount_in})
+    balance_uni_after_swap = interface.IERC20(uni_address).balanceOf(customer)
+    oracle_price_1_eth_uni = 1 / uni_eth_price
+    assert uni_balance_before == 0
+    #assert customer.balance() == INIT_balance_eth - amount_in
+    #assert balance_uni_after_swap > (1 - 0.01) * oracle_price_1_eth_uni
 
 
 
+
+@pytest.mark.require_network("mainnet-fork")
 def test_can_swap_token_for_exact_amount_eth(uniswap_watcher, init_config, get_some_uni):
-    if network.show_active() not in["mainnet-fork"]: pytest.skip("only for test-networks")
-    UNI_TOKEN, WETH_TOKEN, UNI_ETH_PRICE, AMOUNT_IN = init_config
-    uni_balance_before, PERSON = get_some_uni
-    eth_balance_before = PERSON.balance()
-    amount_out, new_amount_in = uniswap_watcher.getAmountIn(uni_balance_before, WETH_TOKEN, UNI_TOKEN)
-    tx = uniswap_watcher.swapTokensForExactETH(uni_balance_before, 0.99 * amount_out, UNI_TOKEN, {"from": PERSON})
-    uni_balance_after = interface.IERC20(UNI_TOKEN).balanceOf(PERSON)
-    eth_balance_after = PERSON.balance()
+    uni_address, weth_address, duni_eth_price, amount_in = init_config
+    uni_balance_before, customer = get_some_uni
+    eth_balance_before = customer.balance()
+    amount_out, new_amount_in = uniswap_watcher.getAmountIn(uni_balance_before, weth_address, uni_address)
+    _ = uniswap_watcher.swapTokensForExactETH(new_amount_in, 0.99 * amount_out, uni_address, {"from": customer})
+    uni_balance_after = interface.IERC20(uni_address).balanceOf(customer)
+    eth_balance_after = customer.balance()
     assert uni_balance_after == 0
-    assert eth_balance_after - eth_balance_before > 0.99 * UNI_ETH_PRICE * uni_balance_before / 10**18
+    assert eth_balance_after - eth_balance_before > 0.99 * duni_eth_price * uni_balance_before / 10**18
 
 
 def test_can_swap_exact_token_for_token(uniswap_watcher, init_config, get_some_uni):
-    if network.show_active() not in["mainnet-fork"]: pytest.skip("only for test-networks")
-    UNI_TOKEN, WETH_TOKEN, UNI_ETH_PRICE, _ = init_config
-    uni_balance_before, PERSON = get_some_uni
+    if network.show_active() != 'mainnet-fork': pytest.skip("only for test-networks")
+    uni_address, weth_address, duni_eth_price, _ = init_config
+    uni_balance_before, customer = get_some_uni
     amount_out_min = 10*22
-    uni_balance_before = interface.IERC20(UNI_TOKEN).balanceOf(PERSON)
-    weth_balance_before = interface.IERC20(WETH_TOKEN).balanceOf(PERSON)
-    tx = uniswap_watcher.swapExactTokensForTokens(uni_balance_before, amount_out_min, UNI_TOKEN, WETH_TOKEN, {"from": PERSON})
-    uni_balance_after = interface.IERC20(UNI_TOKEN).balanceOf(PERSON)
-    weth_balance_after = interface.IERC20(WETH_TOKEN).balanceOf(PERSON)
+    uni_balance_before = interface.IERC20(uni_address).balanceOf(customer)
+    weth_balance_before = interface.IERC20(weth_address).balanceOf(customer)
+    _ = uniswap_watcher.swapExactTokensForTokens(uni_balance_before, amount_out_min, uni_address, weth_address, {"from": customer})
+    uni_balance_after = interface.IERC20(uni_address).balanceOf(customer)
+    weth_balance_after = interface.IERC20(weth_address).balanceOf(customer)
     assert uni_balance_after == 0
-    assert weth_balance_after - weth_balance_before > 0.99 * UNI_ETH_PRICE * uni_balance_before / 10**18
+    assert weth_balance_after - weth_balance_before > 0.99 * duni_eth_price * uni_balance_before / 10**18
 
 
+@pytest.mark.require_network("mainnet-fork")
 def test_can_swap_token_for_exact_token(uniswap_watcher, init_config, get_some_uni):
-    if network.show_active() not in["mainnet-fork"]: pytest.skip("only for test-networks")
-    UNI_TOKEN, WETH_TOKEN, UNI_ETH_PRICE, _ = init_config
-    uni_balance_before, PERSON = get_some_uni
-    uni_balance_before = interface.IERC20(UNI_TOKEN).balanceOf(PERSON)
-    weth_balance_before = interface.IERC20(WETH_TOKEN).balanceOf(PERSON)
-    new_amount_in, amount_out = UniswapV2DMTransact[-1].getAmountOut(uni_balance_before, UNI_TOKEN,  WETH_TOKEN)
-    tx = uniswap_watcher.swapTokensForExactTokens(1 * new_amount_in, new_amount_in, 1 * amount_out, UNI_TOKEN, WETH_TOKEN, {"from": PERSON})
-    uni_balance_after = interface.IERC20(UNI_TOKEN).balanceOf(PERSON)
-    weth_balance_after = interface.IERC20(WETH_TOKEN).balanceOf(PERSON)
+    if network.show_active() != 'mainnet-fork': pytest.skip("only for test-networks")
+    uni_address, weth_address, duni_eth_price, _ = init_config
+    uni_balance_before, customer = get_some_uni
+    uni_balance_before = interface.IERC20(uni_address).balanceOf(customer)
+    weth_balance_before = interface.IERC20(weth_address).balanceOf(customer)
+    new_amount_in, amount_out = UniswapV2DMTransact[-1].getAmountOut(uni_balance_before, uni_address,  weth_address)
+    _ = uniswap_watcher.swapTokensForExactTokens(new_amount_in, new_amount_in, amount_out, uni_address, weth_address, {"from": customer})
+    uni_balance_after = interface.IERC20(uni_address).balanceOf(customer)
+    weth_balance_after = interface.IERC20(weth_address).balanceOf(customer)
     assert uni_balance_after == 0
-    assert weth_balance_after - weth_balance_before > 0.99 * UNI_ETH_PRICE * uni_balance_before / 10**18
+    assert weth_balance_after - weth_balance_before > 0.99 * duni_eth_price * uni_balance_before / 10**18
