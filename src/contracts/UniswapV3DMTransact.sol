@@ -7,14 +7,21 @@ import "../interfaces/IUniswapV3DMTransact.sol";
 import "../interfaces/IERC20.sol";
 import '../interfaces/ISwapRouter.sol';
 import './libraries/TransferHelper.sol';
+import '../interfaces/IPeripheryImmutableState.sol';
+
 
 contract UniswapV3DMTransact {
 
     uint24 public poolFee;
+    address public WETH9;
+    address public factory;
+
     ISwapRouter public immutable swapRouter;
 
     constructor(address _swapRouter) {
         swapRouter = ISwapRouter(_swapRouter);
+        WETH9 = IPeripheryImmutableState(_swapRouter).WETH9();
+        factory = IPeripheryImmutableState(_swapRouter).factory();
     }
 
     function getFactory() public view returns (address factory) {
