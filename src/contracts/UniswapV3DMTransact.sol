@@ -5,9 +5,9 @@ pragma abicoder v2;
 
 import "../interfaces/IUniswapV3DMTransact.sol";
 import "../interfaces/IERC20.sol";
-import '../interfaces/ISwapRouter.sol';
+import '../interfaces/UniswapV3/ISwapRouter.sol';
 import './libraries/TransferHelper.sol';
-import '../interfaces/IPeripheryImmutableState.sol';
+import '../interfaces/UniswapV3/IPeripheryImmutableState.sol';
 
 
 contract UniswapV3DMTransact {

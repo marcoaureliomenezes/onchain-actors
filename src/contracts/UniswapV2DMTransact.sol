@@ -3,8 +3,8 @@
 pragma solidity >=0.5.0;
 
 import "../interfaces/IUniswapV2DMTransact.sol";
-import "../interfaces/IUniswapV2Router02.sol";
-import "../interfaces/IUniswapV2Pair.sol";
+import "../interfaces/UniswapV2/IUniswapV2Router02.sol";
+import "../interfaces/UniswapV2/IUniswapV2Pair.sol";
 import "../interfaces/IERC20.sol";
 
 
