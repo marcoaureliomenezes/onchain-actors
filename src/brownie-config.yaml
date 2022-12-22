@@ -30,16 +30,20 @@ networks:
     uniswapV2Factory: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
     uniswapV3Factory: '0x1F98431c8aD98523631AE4a59f267346ea31F984'
     uniswapV3Router: '0xE592427A0AEce92De3Edee1F18E0157C05861564'
+    lendingPoolAddressProvider: '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5'
     verify: False
 
   goerli:
     uni_token: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'
     weth_token: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6'
     eth_usd_price_feed: '0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e'
+    eth_usd: '0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e'
     uniswapV2Factory: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
     uniswapV2Router02: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
     uniswapV3Router: '0xE592427A0AEce92De3Edee1F18E0157C05861564'
     uniswapV3Factory: '0x1F98431c8aD98523631AE4a59f267346ea31F984'
+    lendingPoolAddressProvider: '0x5E52dEc931FFb32f609681B8438A51c675cc232d'
+    poolAdressesProvider: '0xc4dCB5126a3AfEd129BC3668Ea19285A9f56D15D'
     verify: True
 
 
@@ -47,6 +51,8 @@ networks:
     eth_usd_price_feed: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419'
     uniswapV3Factory: '0x1F98431c8aD98523631AE4a59f267346ea31F984'
     uniswapV3Router: '0xE592427A0AEce92De3Edee1F18E0157C05861564'
+    lendingPoolAddressProvider: '0xd05e3E715d945B59290df0ae8eF85c1BdB684744'
+    poolAdressesProvider: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb'
     verify: False
 
 
@@ -54,6 +60,8 @@ networks:
     eth_usd_price_feed: '0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e'
     uniswapV3Factory: '0x1F98431c8aD98523631AE4a59f267346ea31F984'
     uniswapV3Router: '0xE592427A0AEce92De3Edee1F18E0157C05861564'
+    lendingPoolAddressProvider: '0x178113104fEcbcD7fF8669a0150721e231F0FD4B'
+    poolAdressesProvider: '0x5343b5bA672Ae99d627A1C87866b8E53F47Db2E6'
     verify: True
 
 

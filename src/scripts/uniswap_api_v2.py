@@ -1,4 +1,4 @@
-from scripts.utils import LOCAL_CHAIN_ENV, get_account
+from scripts.utils import get_account
 from scripts.deploy import deploy_uniswap_v2_actor
 from brownie import network, interface, config, UniswapV2DMTransact
 import time

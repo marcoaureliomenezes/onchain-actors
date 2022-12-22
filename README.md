@@ -1,3 +1,13 @@
+# Onchain Actors
+
+In a quick resume, this repo was created with the intent to demonstrate in a case presented to become an Data Engineer Expert. how can Data Engineering and blockchain technologies can work together to a end application to the presentatioIt brings a example of a final application created to interact with 2 DEFI protocols: 
+
+* AAVE protocol for borrowing and lending crypto assets and do flashloans and liquidations.
+
+* Uniswap protocol for exchange tokens and do arbitrage.
+
+how can Data Engineering and blockchain technologies can work together to a end application to the presentatio
+
 How to execute swap using uniswap protocol and these APIs.
 
 
@@ -48,3 +58,4 @@ Example: Swaping AMOUNT of WETH to get 1000000000000000000 UNI Tokens. The Amoun
 
     brownie run scripts/uniswap_api_v3.py swap_exact_output_single 1000000000000000000  0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6 0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984 1000000000000000000 3000 --network goerli
 
+## Aave 
