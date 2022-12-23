@@ -1,18 +1,73 @@
 # Onchain Actors
 
-In a quick resume, this repo was created with the intent to demonstrate in a case presented to become an Data Engineer Expert. how can Data Engineering and blockchain technologies can work together to a end application to the presentatioIt brings a example of a final application created to interact with 2 DEFI protocols: 
+In a quick resume, this repo was created with the intent to demonstrate in a case presented to become an Data Engineer Expert. In a study about how can Data Engineering and blockchain technologies work together to create a profitable tech product.
+
+The concepts that unified both fields are:
+
+* Anyone can read data from blockchain.
+* There are in the defi world many opportunities to realize profit only with software resources.
+
+Anyone that has needed resources can read data from the blockchain and defi protocols and find insights and opportunities to make money and contribute to the defi ecossystem. How this profit happens? Keepers or liquidators and arbitrage opportunities unified with flashloans and flashswaps are the key. To execute transactions and make money from these opportunities a onchain executor is needed.
+
+In this case, a final application was created to interact with 2 DEFI protocols and make transactions. because of its nature, receive messages from Apache Kafka and do transactions using DEFI protocols on top of different blockchain networks EVM compatible, it was called Onchain Actors.
+
+The application only executes required transactions it receives from a Apache Kafka Topic.
+
+Onchain-Actors can do transactions on the following protocols: 
 
 * AAVE protocol for borrowing and lending crypto assets and do flashloans and liquidations.
 
-* Uniswap protocol for exchange tokens and do arbitrage.
-
-how can Data Engineering and blockchain technologies can work together to a end application to the presentatio
-
-How to execute swap using uniswap protocol and these APIs.
+* Uniswap protocol for swapping tokens and do arbitrage.
 
 
+## 1 - AAVE Protocol
 
-### Swap an exact amount of ether per a desired token
+This application was designed to interact with:
+
+* AAVE V2 protocol on Ethereum mainnet, Polygon mainnet, Goerli and Mumbai testnets.
+* AAVE V3 protocol on Polygon mainnet and Mumbai testnet.
+
+Using Aave protocol the following transactions can be made:
+
+### 1.1 - Supplying and Removing liquidity to the protocol and earning interest
+
+Any user can provide liquidity to the lending and borrow using the accepted ERC20 tokens and earn interest.
+
+Example: Supplying 1 WETH to Aave V2 protocol on goerli testnet.
+
+    brownie run scripts/aave_api_v2.py supply_asset 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6 1000000000000000000 --network goerli
+
+Of course, if a user can supply liquidity, he can also remove the liquidity he supplied.
+
+Example: Withdrawing 1 WETH from the Aave V2 protocol on goerli testnet.
+
+    brownie run scripts/aave_api_v2.py withdraw_asset 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6 1000000000000000000 --network goerli
+
+### 1.2 - Borrowing and repaying borrowed tokens
+
+Any user can make a traditional loan on Aave. However, in order to borrow ERC20 tokens, it's needed to have some collateral. To be precise, to borrow X amount of tokens a user need to be overcollaterized with a 150% ratio. And of course there are interests.
+
+Example: Borrowing 10000 DAI from Aave V2 protocol on goerli testnet.
+
+    brownie run scripts/aave_api_v2.py borrow_asset 0x75Ab5AB1Eef154C0352Fc31D2428Cef80C7F8B33 1000000000000000000 --network goerli
+
+Of course, if a user can make a loan, he can also repay the debts.
+
+Example: Repaying a debt of 10000 DAI on Aave V2 protocol on goerli testnet.
+
+    brownie run scripts/aave_api_v2.py repay_asset 0x75Ab5AB1Eef154C0352Fc31D2428Cef80C7F8B33 1000000000000000000 --network goerli
+
+### 1.3 - Advanced Financial operations such as leverage and short selling.
+
+### 1.4 - Keepers and liquidations
+
+### 1.5 - Flashloans and its opportunities
+
+
+## UNISWAP Decentrilized Exchange Protocol
+
+
+### 1.1 Swap an exact amount of ether per a desired token
 brownie run scripts/uniswap_api_v2.py swap_exact_eth_amount_for_token "amount_in" "token_address_out" --network "network"
 
 Example:
